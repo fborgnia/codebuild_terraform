@@ -146,7 +146,54 @@ f.4. Enter "yes" to migrate the state to the S3 backend
 		commands will detect it and remind you to do so if necessary.
 ```
 
-g. Completed! run the first build to confirm the application stack is successfully deployed.
+**3. Configure the application terraform backend and workspace.**
+
+a. Clone Application terraform repository
+
+```
+	$ git clone https://<source_location> 
+``` 
+
+b. Configure Terraform backend, by adding the following snippet to the root's module variables.tf file, using the S3 bucket created by the codebuild template.
+
+```
+	terraform {
+	  backend "s3" {
+	    bucket = "<bucket_name>"
+	    key    = "terraform_state_files/<app_name>.tfstate"
+	    region = "us-east-1"
+	  }
+	} 
+``` 
+
+c. Initialize terraform backend
+
+```
+	$ cd <App_repo> 
+	$ terraform init
+``` 
+
+c. Create workspace for new stage.
+
+```
+	$ terraform workspace new <stage>
+```
+
+c. Push changes to repository.
+
+```
+	$ git add variables.tf
+	$ git commit -m "Adds S3 backend configuration for <dev|test|prod>"
+	$ git push origin master
+```
+
+**4. Completed! run the first build to confirm the application stack is successfully deployed.**
+
+a. Login to the AWS Console for the corresponding account with the InfraDevOps role
+
+b. Navigate to AWS CodeBuild -> CodeBuild Projects -> <App-name>-<stage>
+
+c. Run Build, and enjoy! 
 
 ### Create New Stage in existing account
 
@@ -195,7 +242,54 @@ e. Apply the plan
 		$ terraform apply tfplan
 ```
 
-g. Completed! run the first build to confirm the application stack is successfully deployed.
+**3. Configure the application terraform backend and workspace.**
+
+a. Clone Application terraform repository
+
+```
+	$ git clone https://<source_location> 
+``` 
+
+b. Configure Terraform backend, by adding the following snippet to the root's module variables.tf file, using the S3 bucket created by the codebuild template.
+
+```
+	terraform {
+	  backend "s3" {
+	    bucket = "<bucket_name>"
+	    key    = "terraform_state_files/<app_name>.tfstate"
+	    region = "us-east-1"
+	  }
+	} 
+``` 
+
+c. Initialize terraform backend
+
+```
+	$ cd <App_repo> 
+	$ terraform init
+``` 
+
+c. Create workspace for new stage.
+
+```
+	$ terraform workspace new <stage>
+```
+
+c. Push changes to repository.
+
+```
+	$ git add variables.tf
+	$ git commit -m "Adds S3 backend configuration for <dev|test|prod>"
+	$ git push origin master
+```
+
+**4. Completed! run the first build to confirm the application stack is successfully deployed.**
+
+a. Login to the AWS Console for the corresponding account with the InfraDevOps role
+
+b. Navigate to AWS CodeBuild -> CodeBuild Projects -> <App-name>-<stage>
+
+c. Run Build, and enjoy!
 
 ## CodeBuild Buildspec requirements
 
