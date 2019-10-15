@@ -18,13 +18,15 @@ This guide assumes that one AWS Account is used for one stage of one application
 	e. Application Terraform Source repository URL (ALM GITHUB)
 
 2 - Deploy Pipeline configuration
-	a. Complete stage variable file in variables/<stage>.tfvars
+a. Complete stage variable file in variables/<stage>.tfvars
 ```
 		stage = "dev|test|prod"
 		name = "example-app"
 		source_location = "https://github.com/fborgnia/example_app.git"
 ```
-	b. Validate terraform template
+
+b. Validate terraform template
+
 ```
 		$ terraform validate -var-file="variables/<stage>.tfvars"
 ```
