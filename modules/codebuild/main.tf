@@ -52,8 +52,14 @@ resource "aws_codebuild_project" "terraform_backend" {
     }
   }
 
+  #source {
+  #  type     = "S3"
+  #  location = "${var.bucket_name}/${var.name}.zip"
+  #}
+  
   source {
-    type     = "S3"
-    location = "${var.bucket_name}/${var.name}.zip"
+    type            = "GITHUB"
+    location        = "https://github.com/fborgnia/example_app.git"
+    git_clone_depth = 1
   }
 }
