@@ -57,8 +57,8 @@ f. Update the terraform backend configuration to persist the state in S3
 f.1. Take note of execution output: "backend_bucket_name" and the bucket region
 
 ```
-			backend_bucket_name: pipeline-<stage>-<app-name>-<random_string>
-			bucket_region:       us-east-1
+		backend_bucket_name: pipeline-<stage>-<app-name>-<random_string>
+		bucket_region:       us-east-1
 ```
 
 f.2. Uncomment and complete the variables.tf file (terraform variables can't be used here)
@@ -66,84 +66,84 @@ f.2. Uncomment and complete the variables.tf file (terraform variables can't be 
 from:
 
 ```
-			#terraform {
-			#  backend "s3" {
-			#    bucket = ""
-			#    key    = ""
-			#    region = ""
-			#  }
-			#}
+		#terraform {
+		#  backend "s3" {
+		#    bucket = ""
+		#    key    = ""
+		#    region = ""
+		#  }
+		#}
 ```
 
 to:
 
 ```
-			terraform {
-			  backend "s3" {
-			    bucket = "pipeline-dev-example-app-ulwydhpc"
-			    key    = "terraform_state_files/example_app.tfstate"
-			    region = "us-east-1"
-			  }
-			}
+		terraform {
+		  backend "s3" {
+		    bucket = "pipeline-dev-example-app-ulwydhpc"
+		    key    = "terraform_state_files/example_app.tfstate"
+		    region = "us-east-1"
+		  }
+		}
 ```
 
 f.3. Initialize and migrate state to S3 backend.
 
 ```
-			$ terraform init
-			Initializing modules...
+		$ terraform init
+		Initializing modules...
 
-			Initializing the backend...
-			Backend configuration changed!
+		Initializing the backend...
+		Backend configuration changed!
 
-			Terraform has detected that the configuration specified for the backend
-			has changed. Terraform will now check for existing state in the backends.
+		Terraform has detected that the configuration specified for the backend
+		has changed. Terraform will now check for existing state in the backends.
 
 
-			Do you want to migrate all workspaces to "s3"?
-			  Both the existing "s3" backend and the newly configured "s3" backend
-			  support workspaces. When migrating between backends, Terraform will copy
-			  all workspaces (with the same names). THIS WILL OVERWRITE any conflicting
-			  states in the destination.
+		Do you want to migrate all workspaces to "s3"?
+		  Both the existing "s3" backend and the newly configured "s3" backend
+		  support workspaces. When migrating between backends, Terraform will copy
+		  all workspaces (with the same names). THIS WILL OVERWRITE any conflicting
+		  states in the destination.
 
-			  Terraform initialization doesn't currently migrate only select workspaces.
-			  If you want to migrate a select number of workspaces, you must manually
-			  pull and push those states.
+		  Terraform initialization doesn't currently migrate only select workspaces.
+		  If you want to migrate a select number of workspaces, you must manually
+		  pull and push those states.
 
-			  If you answer "yes", Terraform will migrate all states. If you answer
-			  "no", Terraform will abort.
+		  If you answer "yes", Terraform will migrate all states. If you answer
+		  "no", Terraform will abort.
 
-			  Enter a value:
+		  Enter a value:
 ```
 
 f.4. Enter "yes" to migrate the state to the S3 backend
 
 ```
-			Successfully configured the backend "s3"! Terraform will automatically
-			use this backend unless the backend configuration changes.
+		Successfully configured the backend "s3"! Terraform will automatically
+		use this backend unless the backend configuration changes.
 
-			Initializing provider plugins...
+		Initializing provider plugins...
 
-			The following providers do not have any version constraints in configuration,
-			so the latest version was installed.
+		The following providers do not have any version constraints in configuration,
+		so the latest version was installed.
 
-			To prevent automatic upgrades to new major versions that may contain breaking
-			changes, it is recommended to add version = "..." constraints to the
-			corresponding provider blocks in configuration, with the constraint strings
-			suggested below.
+		To prevent automatic upgrades to new major versions that may contain breaking
+		changes, it is recommended to add version = "..." constraints to the
+		corresponding provider blocks in configuration, with the constraint strings
+		suggested below.
 
-			* provider.aws: version = "~> 2.32"
-			* provider.random: version = "~> 2.2"
+		* provider.aws: version = "~> 2.32"
+		* provider.random: version = "~> 2.2"
 
-			Terraform has been successfully initialized!
+		Terraform has been successfully initialized!
 
-			You may now begin working with Terraform. Try running "terraform plan" to see
-			any changes that are required for your infrastructure. All Terraform commands
-			should now work.
+		You may now begin working with Terraform. Try running "terraform plan" to see
+		any changes that are required for your infrastructure. All Terraform commands
+		should now work.
 
-			If you ever set or change modules or backend configuration for Terraform,
-			rerun this command to reinitialize your working directory. If you forget, other
-			commands will detect it and remind you to do so if necessary.
+		If you ever set or change modules or backend configuration for Terraform,
+		rerun this command to reinitialize your working directory. If you forget, other
+		commands will detect it and remind you to do so if necessary.
 ```
 
 g. Completed! run the first build to confirm the application stack is successfully deployed.
