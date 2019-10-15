@@ -10,14 +10,15 @@ Once the AWS Account are provisioned and accessible by application developers, t
 
 This guide assumes that one AWS Account is used for one stage of one application, if that is not the case, adjust parameters accordingly.
 
-1 - Collect pre-requisite information and request account access:
+**1 - Collect pre-requisite information and request account access:**
+
 	a. Account ID.
 	b. Access to InfraDevOps role
 	c. Stage name (dev|test|prod)
 	d. Application name
 	e. Application Terraform Source repository URL (ALM GITHUB)
 
-2 - Deploy Pipeline configuration
+**2 - Deploy Pipeline configuration**
 
 a. Complete stage variable file in variables/<stage>.tfvars
 ```
@@ -53,14 +54,14 @@ e. Apply the plan
 
 f. Update the terraform backend configuration to persist the state in S3
 	
-1. Take note of execution output: "backend_bucket_name" and the bucket region
+f.1. Take note of execution output: "backend_bucket_name" and the bucket region
 
 ```
 			backend_bucket_name: pipeline-<stage>-<app-name>-<random_string>
 			bucket_region:       us-east-1
 ```
 
-2. Uncomment and complete the variables.tf file (terraform variables can't be used here)
+f.2. Uncomment and complete the variables.tf file (terraform variables can't be used here)
 
 from:
 
@@ -86,7 +87,7 @@ to:
 			}
 ```
 
-3. Initialize and migrate state to S3 backend.
+f.3. Initialize and migrate state to S3 backend.
 
 ```
 			$ terraform init
@@ -115,7 +116,7 @@ to:
 			  Enter a value:
 ```
 
-Enter "yes" to migrate the state to the S3 backend
+f.4. Enter "yes" to migrate the state to the S3 backend
 
 ```
 			Successfully configured the backend "s3"! Terraform will automatically
