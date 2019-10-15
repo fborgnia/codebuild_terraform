@@ -18,6 +18,7 @@ This guide assumes that one AWS Account is used for one stage of one application
 	e. Application Terraform Source repository URL (ALM GITHUB)
 
 2 - Deploy Pipeline configuration
+
 a. Complete stage variable file in variables/<stage>.tfvars
 ```
 		stage = "dev|test|prod"
@@ -30,28 +31,39 @@ b. Validate terraform template
 ```
 		$ terraform validate -var-file="variables/<stage>.tfvars"
 ```
-	c. Create terraform backend and workspace for the stage
+
+c. Create terraform backend and workspace for the stage
+
 ```
 		$ terraform init
 		$ terraform workspace new <stage>
 ```
-	d. Create terraform plan & review deployment
+
+d. Create terraform plan & review deployment
+
 ```
 		$ terraform plan -var-file="variables/<stage>.tfvars" -out="tfplan"
 ```
-   	e. Apply the plan
+
+e. Apply the plan
+
 ```
 		$ terraform apply tfplan
 ```
-   	f. Update the terraform backend configuration to persist the state in S3
 
-   		1. Take note of execution output: "backend_bucket_name" and the bucket region
+f. Update the terraform backend configuration to persist the state in S3
+	
+1. Take note of execution output: "backend_bucket_name" and the bucket region
+
 ```
 			backend_bucket_name: pipeline-<stage>-<app-name>-<random_string>
 			bucket_region:       us-east-1
 ```
-		2. Uncomment and complete the variables.tf file (terraform variables can't be used here)
-		from:
+
+2. Uncomment and complete the variables.tf file (terraform variables can't be used here)
+
+from:
+
 ```
 			#terraform {
 			#  backend "s3" {
@@ -61,7 +73,9 @@ b. Validate terraform template
 			#  }
 			#}
 ```
-		to:
+
+to:
+
 ```
 			terraform {
 			  backend "s3" {
@@ -71,7 +85,9 @@ b. Validate terraform template
 			  }
 			}
 ```
-		3. Initialize and migrate state to S3 backend.
+
+3. Initialize and migrate state to S3 backend.
+
 ```
 			$ terraform init
 			Initializing modules...
@@ -98,7 +114,9 @@ b. Validate terraform template
 
 			  Enter a value:
 ```
-			Enter "yes" to migrate the state to the S3 backend
+
+Enter "yes" to migrate the state to the S3 backend
+
 ```
 			Successfully configured the backend "s3"! Terraform will automatically
 			use this backend unless the backend configuration changes.
@@ -126,7 +144,8 @@ b. Validate terraform template
 			rerun this command to reinitialize your working directory. If you forget, other
 			commands will detect it and remind you to do so if necessary.
 ```
-	g. Completed! run the first build to confirm the application stack is successfully deployed.
+
+g. Completed! run the first build to confirm the application stack is successfully deployed.
 
 ### Create New Stage in existing account
 
