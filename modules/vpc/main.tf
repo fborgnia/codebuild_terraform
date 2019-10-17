@@ -46,7 +46,7 @@ resource "aws_subnet" "public_1a" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "pipeline-${var.name}-public-1b"
+    Name = "pipeline-${var.name}-public-1a"
   }
 }
 
@@ -89,6 +89,11 @@ resource "aws_route_table" "public" {
   }
 }
 
+resource "aws_route_table_association" "public_1a" {
+  subnet_id      = "${aws_subnet.public_1a.id}"
+  route_table_id = "${aws_route_table.public.id}"
+}
+
 resource "aws_security_group" "default" {
   name        = "pipeline-${var.name}-default"
   description = "Allow TLS inbound http traffic to self for VPC endpoints and outbound for internet and Github enterprise on-prem connectivity."
@@ -101,11 +106,53 @@ resource "aws_security_group" "default" {
     self = true
   }
 
-  egress {
-    from_port = 443
-    to_port   = 443
+  ingress {
+    from_port = 80
+    to_port   = 80
     protocol  = "tcp"
-    self      = true
+    self = true
+  }
+
+  ingress {
+    from_port   = 3128
+    to_port     = 3128
+    protocol    = "tcp"
+    self = true
+  }
+
+  ingress {
+    from_port = 22
+    to_port   = 22
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 22
+    to_port   = 22
+    protocol  = "tcp"
+    self = true
+  }
+
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 3128
+    to_port     = 3128
+    protocol    = "tcp"
+    self = true
   }
 }
 

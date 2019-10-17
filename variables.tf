@@ -23,3 +23,8 @@ variable "stage" {
   default = "dev"
   description = "The identifier for the environment stage: dev, test or prod?"
 }
+
+variable "http_proxy" {
+  type = string
+  description = "The utl:port for the proxy endpoint for outbound internet connectivity"
+}

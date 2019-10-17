@@ -28,6 +28,7 @@ module "iam_roles" {
 module "codebuild" {
   source                = "./modules/codebuild"
   name 				          = "${var.app_name}"
+  http_proxy            = "${var.http_proxy}"
   source_location       = "${var.source_location}"
   state_storage         = "${module.state_storage.bucket_name}"
   state_storage_key     = "${module.kms_encryption_key.kms_key_arn}"

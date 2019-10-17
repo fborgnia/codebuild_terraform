@@ -34,6 +34,10 @@ variable "security_group_id" {
   type = string
 }
 
+variable "http_proxy" {
+  type = string
+}
+
 variable "source_location" {
   type = string
   description = "The https url for the github enterprise repository of this app."
@@ -61,6 +65,26 @@ resource "aws_codebuild_project" "terraform_backend" {
     environment_variable {
       name  = "STAGE"
       value = "${var.stage}"
+    }
+
+    environment_variable {
+      name  = "HTTP_PROXY"
+      value = "${var.http_proxy}"
+    }
+
+    environment_variable {
+      name  = "HTTPS_PROXY"
+      value = "${var.http_proxy}"
+    }
+
+    environment_variable {
+      name  = "http_proxy"
+      value = "${var.http_proxy}"
+    }
+
+    environment_variable {
+      name  = "https_proxy"
+      value = "${var.http_proxy}"
     }
   }
 
