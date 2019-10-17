@@ -10,6 +10,10 @@ variable "state_storage" {
   type = string
 }
 
+variable "state_storage_key" {
+  type = string
+}
+
 variable "service_iam_role_arn" {
   type = string
 }
@@ -36,11 +40,12 @@ variable "source_location" {
 }
 
 resource "aws_codebuild_project" "terraform_backend" {
-  name          = "${var.name}-${var.stage}"
-  description   = "${var.name} for ${var.stage} environment"
-  build_timeout = "60"
-  service_role  = "${var.service_iam_role_arn}"
-
+  name           = "${var.name}-${var.stage}"
+  description    = "${var.name} for ${var.stage} environment"
+  build_timeout  = "60"
+  service_role   = "${var.service_iam_role_arn}"
+  encryption_key = "${var.state_storage_key}"
+  
   artifacts {
     type = "S3"
     name = "tfplan"

@@ -1,10 +1,12 @@
-terraform {
-  backend "s3" {
-    bucket = "pipeline-dev-example-app-ulwydhpc"
-    key    = "terraform_state_files/codebuild_terraform_backend.tfstate"
-    region = "us-east-1"
-  }
-}
+#terraform {
+#  backend "s3" {
+#    bucket = ""
+#    key    = "terraform_state_files/codebuild_terraform_backend.tfstate"
+#    region = "us-east-1"
+#    encrypt = true
+#    kms_key_id = 
+#  }
+#}
 
 variable "app_name" {
   type = string

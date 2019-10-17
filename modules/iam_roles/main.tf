@@ -1,12 +1,12 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
 variable "name" {
   type = string
 }
 
 variable "state_storage_arn" {
+  type = string
+}
+
+variable "kms_key_arn" {
   type = string
 }
 
@@ -29,9 +29,29 @@ resource "aws_iam_role" "codebuild_service_role" {
 EOF
 }
 
+data "aws_iam_policy_document" "kms_key_policy_doc" {
+  statement {
+    sid = "AllowKMSKeyUsage"
+
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt"
+    ]
+
+    resources = [
+      "${var.kms_key_arn}",
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "kms_key_policy" {
+  role = "${aws_iam_role.codebuild_service_role.name}"
+  policy = "${data.aws_iam_policy_document.kms_key_policy_doc.json}"
+}
+
 data "aws_iam_policy_document" "state_storage_policy_doc" {
   statement {
-    sid = "1"
+    sid = "AllowS3Usage"
 
     actions = [
       "s3:ListBucket",
@@ -53,10 +73,12 @@ resource "aws_iam_role_policy" "state_storage_policy" {
 
 data "aws_iam_policy_document" "codebuild_logs_policy_doc" {
   statement {
-    sid = "1"
+    sid = "AllowCloudwatchLogsUsage"
 
     actions = [
-      "*"
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
     ]
 
     resources = [
@@ -72,12 +94,10 @@ resource "aws_iam_role_policy" "codebuild_logs_policy" {
 
 data "aws_iam_policy_document" "terraform_run_policy_doc" {
   statement {
-    sid = "1"
+    sid = "AllowAWSUsageforTerraform"
 
     actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents"
+      "*"
     ]
 
     resources = [
@@ -90,7 +110,6 @@ resource "aws_iam_role_policy" "terraform_run_policy" {
   role = "${aws_iam_role.codebuild_service_role.name}"
   policy = "${data.aws_iam_policy_document.terraform_run_policy_doc.json}"
 }
-
 
 output "codebuild_service_iam_role_arn" {
   value = "${aws_iam_role.codebuild_service_role.arn}"

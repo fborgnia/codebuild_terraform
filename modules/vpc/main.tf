@@ -13,7 +13,7 @@ resource "aws_vpc" "default" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "${var.name}"
+    Name = "pipeline-${var.name}"
   }
 }
 
@@ -24,7 +24,7 @@ resource "aws_subnet" "private_1b" {
   map_public_ip_on_launch = false
 
   tags = {
-    Name = "${var.name}-private-1a"
+    Name = "pipeline-${var.name}-private-1a"
   }
 }
 
@@ -35,7 +35,18 @@ resource "aws_subnet" "private_1a" {
   map_public_ip_on_launch = false
 
   tags = {
-    Name = "${var.name}-private-1b"
+    Name = "pipeline-${var.name}-private-1b"
+  }
+}
+
+resource "aws_subnet" "public_1a" {
+  vpc_id     = "${aws_vpc.default.id}"
+  cidr_block = "10.13.3.0/24"
+  availability_zone = "us-east-1a"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "pipeline-${var.name}-public-1b"
   }
 }
 
@@ -43,7 +54,7 @@ resource "aws_route_table" "private" {
   vpc_id = "${aws_vpc.default.id}"
 
   tags = {
-    Name = "${var.name}-private"
+    Name = "pipeline-${var.name}-private"
   }
 }
 
@@ -57,9 +68,30 @@ resource "aws_route_table_association" "private-1b" {
   route_table_id = "${aws_route_table.private.id}"
 }
 
+resource "aws_internet_gateway" "gw" {
+  vpc_id = "${aws_vpc.default.id}"
+
+  tags = {
+    Name = "pipeline-${var.name}"
+  }
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = "${aws_vpc.default.id}"
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.gw.id}"
+  }
+
+  tags = {
+    Name = "pipeline-${var.name}-public"
+  }
+}
+
 resource "aws_security_group" "default" {
-  name        = "${var.name}-default"
-  description = "Allow TLS traffic to self"
+  name        = "pipeline-${var.name}-default"
+  description = "Allow TLS inbound http traffic to self for VPC endpoints and outbound for internet and Github enterprise on-prem connectivity."
   vpc_id      = "${aws_vpc.default.id}"
 
   ingress {
