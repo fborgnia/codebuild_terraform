@@ -6,7 +6,7 @@ variable "name" {
   type = string
 }
 
-variable "bucket_name" {
+variable "state_storage" {
   type = string
 }
 
@@ -18,6 +18,23 @@ variable "stage" {
   type = string
 }
 
+variable "vpc_id" {
+  type = string
+}
+
+variable "subnets" {
+  type = list(string)
+}
+
+variable "security_group_id" {
+  type = string
+}
+
+variable "source_location" {
+  type = string
+  description = "The https url for the github enterprise repository of this app."
+}
+
 resource "aws_codebuild_project" "terraform_backend" {
   name          = "${var.name}-${var.stage}"
   description   = "${var.name} for ${var.stage} environment"
@@ -27,7 +44,7 @@ resource "aws_codebuild_project" "terraform_backend" {
   artifacts {
     type = "S3"
     name = "tfplan"
-    location = "${var.bucket_name}" 
+    location = "${var.state_storage}" 
   }
 
   environment {
@@ -52,14 +69,29 @@ resource "aws_codebuild_project" "terraform_backend" {
     }
   }
 
-  #source {
-  #  type     = "S3"
-  #  location = "${var.bucket_name}/${var.name}.zip"
-  #}
-  
   source {
     type            = "GITHUB"
     location        = "https://github.com/fborgnia/example_app.git"
     git_clone_depth = 1
   }
+
+  #source {
+  #  type            = "GITHUB_ENTERPRISE"
+  #  location        = "${var.source_location}"
+  #  git_clone_depth = 1
+  #}
+
+  vpc_config {
+    vpc_id = "${var.vpc_id}"
+
+    subnets = "${var.subnets}"
+
+    security_group_ids = [
+      "${var.security_group_id}"
+    ]
+  }
+}
+
+output "project_name" {
+  value = "${aws_codebuild_project.terraform_backend.id}"
 }

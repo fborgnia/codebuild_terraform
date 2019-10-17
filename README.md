@@ -1,12 +1,16 @@
-# CI/CD Codebuild Terraform Backend User Guide
+# CI/CD Codebuild Terraform Backend
 
-This document contains usage instructions and step-by-step guides to operate automated terraform deployments for dev, test and production environments.
+This solution provides an execution backend for terraform templates to support multiple developers releasing infrastructure changes from dev to test and prod environments.
+
+## User Guide
+
+This document contains usage instructions and step-by-step guides to operate automated terraform deployments for dev, test and production environments using codebuild.
 
 ## Application Account Onboarding
 
-Once the AWS Account are provisioned and accessible by application developers, the terraform backend can be configured in the account with this steps.
+Once an AWS Account is provisioned and accessible by application developers, the terraform backend can be configured in the account with the steps below.
 
-### Create New Account
+### Create terraform build project in a New Account
 
 This guide assumes that one AWS Account is used for one stage of one application, if that is not the case, adjust parameters accordingly.
 
@@ -183,7 +187,7 @@ c. Push changes to repository.
 
 ```
 	$ git add variables.tf
-	$ git commit -m "Adds S3 backend configuration for <dev|test|prod>"
+	$ git commit -m "Adds S3 backend configuration for <dev|test|prod> stage"
 	$ git push origin master
 ```
 
@@ -195,7 +199,7 @@ b. Navigate to AWS CodeBuild -> CodeBuild Projects -> <App-name>-<stage>
 
 c. Run Build, and enjoy! 
 
-### Create New Stage in existing account
+### Create terraform pipeline for a New Stage in existing account
 
 If the account was already onboarded with one application stage, but a new application or application stage will be also hosted in the account, complete the onboarding of the pipeline following these steps.
 
@@ -291,7 +295,61 @@ b. Navigate to AWS CodeBuild -> CodeBuild Projects -> <App-name>-<stage>
 
 c. Run Build, and enjoy!
 
-## CodeBuild Buildspec requirements
+## Terraform State Backend, Workspaces & Stages
+
+This execution backend requires the usage of S3 state backed to persist terraform states between different build runs. The application template must configure the backend property, tipically at the topmost of the root variables.tf file, with a snippet like:
+
+```
+terraform {
+  backend "s3" {
+    bucket = "<bucket name>"
+    key    = "terraform/<app name>.tfstate"
+    region = "us-east-1"
+  }
+} 
+```
+
+A stage is a name that identifies an environment for deployment, normally shortned "dev" for development environments, test for Operational/User Acceptance testing environment and "prod" for Production.
+
+The backend and the workspace must be initialized prior to executing a build in the pipeline, after saving the configuration in the file, run init and workspace new <stage> to initialize the state backend and to create the workspace. for example for "dev" stage
+
+```
+$ terraform init
+$ terraform workspace new dev
+```
+
+This template receives the stage as a parameter, and configures an environmental variable in the CodeBuild Project with the value, accessible in the build script as $STAGE, and can be set in the codebuild script using the workspace select command.
+
+```
+$ terraform workspace select $STAGE
+```
+
+See the Buildspec section below for a complete buildspec.yaml example. 
+
+## Terraform variables
+
+The build should invoke terraform using a variable file, with the name for the corresponding stage, using the -var-file parameter for terraform. 
+Variable files should be available under the "/variables" directory in the template source root. and the build script should invoke terraform plan with the corresponding file for the stage, for example in dev:
+
+```
+$ terraform plan -var-file="variables/dev.tfvars" -out="tfplan"
+```
+
+in codebuild, the script can autocomplete to name of the stage from the environmental variable $STAGE configured for the project.
+
+```
+$ terraform plan -var-file="variables/$STAGE.tfvars" -out="tfplan"
+```
+
+The "tfplan" file generated contains the execution plan for that particular set of input variables, and is executed with the apply command.
+
+```
+$ terraform apply "tfplan"
+```
+
+## Application's CodeBuild Buildspec
+
+Each application template will package together with terraform code a buildspec.yaml file with the recipe to execute the template in the appropriate workspace and variable file.
 
 Pipeline automation imposes mandatory guidelines for buildspec.yaml definition for this terraform backend, the script must execute the steps:
 
@@ -302,15 +360,17 @@ Pipeline automation imposes mandatory guidelines for buildspec.yaml definition f
   5. Generate Terraform plan
   6. Apply Terraform plan
 
-To correctly implement the steps above, complete your application buildspec.yaml file with the snippet below, and add it to the root directory of the terraform repository.
+To correctly implement the steps above, include this steps in the app's buildspec.yaml file, and add it to the root directory of the terraform repository.
 
 ```
 phases:
-  build:
-    commands:
+  install:
+  	commands:
       - apt-get install wget unzip
       - wget -q https://releases.hashicorp.com/terraform/0.12.10/terraform_0.12.10_linux_amd64.zip -O terraform.zip
       - unzip ./terraform.zip -d /usr/local/bin/
+  build:
+  	commands:
       - terraform init
       - terraform workspace select $STAGE
       - terraform validate 
