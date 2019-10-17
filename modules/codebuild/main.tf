@@ -38,6 +38,10 @@ variable "http_proxy" {
   type = string
 }
 
+variable "no_proxy" {
+  type = string
+}
+
 variable "source_location" {
   type = string
   description = "The https url for the github enterprise repository of this app."
@@ -78,6 +82,11 @@ resource "aws_codebuild_project" "terraform_backend" {
     }
 
     environment_variable {
+      name  = "NO_PROXY"
+      value = "${var.no_proxy}"
+    }
+
+    environment_variable {
       name  = "http_proxy"
       value = "${var.http_proxy}"
     }
@@ -85,6 +94,11 @@ resource "aws_codebuild_project" "terraform_backend" {
     environment_variable {
       name  = "https_proxy"
       value = "${var.http_proxy}"
+    }
+
+    environment_variable {
+      name  = "no_proxy"
+      value = "${var.no_proxy}"
     }
   }
 
